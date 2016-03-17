@@ -29,6 +29,7 @@ var GiftedMessenger = React.createClass({
   getDefaultProps() {
     return {
       displayNames: true,
+      displayNamesInsideBubble: false,
       placeholder: 'Type a message...',
       styles: {},
       autoFocus: true,
@@ -50,6 +51,8 @@ var GiftedMessenger = React.createClass({
       onImagePress: null,
       onMessageLongPress: null,
       hideTextInput: false,
+      keyboardDismissMode: 'interactive',
+      keyboardShouldPersistTaps: true,
       submitOnReturn: false,
       forceRenderImage: false,
       onChangeText: (text) => {},
@@ -59,6 +62,7 @@ var GiftedMessenger = React.createClass({
 
   propTypes: {
     displayNames: React.PropTypes.bool,
+    displayNamesInsideBubble: React.PropTypes.bool,
     placeholder: React.PropTypes.string,
     styles: React.PropTypes.object,
     autoFocus: React.PropTypes.bool,
@@ -83,6 +87,8 @@ var GiftedMessenger = React.createClass({
     onImagePress: React.PropTypes.func,
     onMessageLongPress: React.PropTypes.func,
     hideTextInput: React.PropTypes.bool,
+    keyboardDismissMode: React.PropTypes.string,
+    keyboardShouldPersistTaps: React.PropTypes.bool,
     forceRenderImage: React.PropTypes.bool,
     onChangeText: React.PropTypes.func,
     autoScroll: React.PropTypes.bool,
@@ -92,9 +98,11 @@ var GiftedMessenger = React.createClass({
     this._data = [];
     this._rowIds = [];
 
-    var textInputHeight = 0;
+    var textInputHeight = 44;
     if (this.props.hideTextInput === false) {
-      textInputHeight = this.props.style.textInputContainer.height || 44;
+      if (this.props.styles.hasOwnProperty('textInputContainer')) {
+        textInputHeight = this.props.styles.textInputContainer.height || textInputHeight;
+      }
     }
 
     this.listViewMaxHeight = this.props.maxHeight - textInputHeight;
@@ -188,6 +196,7 @@ var GiftedMessenger = React.createClass({
           rowID={rowID}
           onErrorButtonPress={this.props.onErrorButtonPress}
           displayNames={this.props.displayNames}
+          displayNamesInsideBubble={this.props.displayNamesInsideBubble}
           diffMessage={diffMessage}
           position={rowData.position}
           forceRenderImage={this.props.forceRenderImage}
@@ -241,7 +250,10 @@ var GiftedMessenger = React.createClass({
     this._rowIds = [];
     this.appendMessages(nextProps.messages);
 
-    var textInputHeight = nextProps.style.textInputContainer.height || 44;
+    var textInputHeight = 44;
+    if (nextProps.styles.hasOwnProperty('textInputContainer')) {
+      textInputHeight = nextProps.styles.textInputContainer.height || textInputHeight;
+    }
 
     if (nextProps.maxHeight !== this.props.maxHeight) {
       this.listViewMaxHeight = nextProps.maxHeight;
@@ -491,13 +503,9 @@ var GiftedMessenger = React.createClass({
           onKeyboardWillHide={this.onKeyboardWillHide}
           onKeyboardDidHide={this.onKeyboardDidHide}
 
-          /*
-            keyboardShouldPersistTaps={false} // @issue keyboardShouldPersistTaps={false} + textInput focused = 2 taps are needed to trigger the ParsedText links
-            keyboardDismissMode='interactive'
-          */
 
-          keyboardShouldPersistTaps={true}
-          keyboardDismissMode='interactive'
+          keyboardShouldPersistTaps={this.props.keyboardShouldPersistTaps} // @issue keyboardShouldPersistTaps={false} + textInput focused = 2 taps are needed to trigger the ParsedText links
+          keyboardDismissMode={this.props.keyboardDismissMode}
 
 
           initialListSize={10}
